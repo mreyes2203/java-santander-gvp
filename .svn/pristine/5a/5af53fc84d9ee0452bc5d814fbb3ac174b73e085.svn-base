@@ -1,0 +1,898 @@
+package Santander;
+
+import eContact.FunctionsGVP;
+import eContact.KVPairList;
+import eContact.OracleDBAccess;
+import eContact.Parameters;
+
+
+//import javax.servlet.jsp.PageContext;
+import java.io.*;
+import java.net.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.*;
+import javax.xml.rpc.ServiceException;
+import javax.xml.rpc.ServiceFactory;
+
+
+//import proxy.soap.MQProxy;
+import oracle.jdbc.OracleCallableStatement;
+import oracle.jdbc.OracleTypes;
+import oracle.sql.ARRAY;
+import oracle.sql.ArrayDescriptor;
+import oracle.sql.STRUCT;
+import oracle.sql.StructDescriptor;
+
+import org.apache.axis.AxisFault;
+import org.apache.log4j.Logger;
+import org.apache.log4j.RollingFileAppender;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.*;
+
+import java.sql.CallableStatement;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
+
+import java.rmi.RemoteException;
+
+
+public class FunctionsSantander extends FunctionsGVP
+{
+    public ArrayList PromptList = new ArrayList(1);
+
+    
+    
+    /*
+     * Variables Generales para Web Services de Ripley
+     * */        
+    
+
+	static String[] sDesafios;
+	static javax.xml.rpc.Service service = null;
+	static java.net.URL url = null;
+	private static ServiceFactory serviceFactory;
+	/* FIN VARIABLES PARA AUTENTICACION*/
+	
+	
+	/*
+	 * Variables Generales para Base de Datos de Ripley
+	 * */
+	
+	public Parameters parametrosBD = new Parameters();
+	private OracleDBAccess conexionDB = new OracleDBAccess();
+	
+//	private static  Gson            gson    = new Gson();
+//    private static  JsonParser      parser  = new JsonParser();
+    public String  hostIvrToDB     = "127.0.0.1";
+    public int     portIvrToDB     = 50081;
+    public int     timeoutSocket  = 3000;
+    
+    
+	/*
+     * Variables Generales para MQ
+     * */        
+    public String MQhost = "127.0.0.1";
+    public int MQport = 50039;
+
+    /** VARIABLES PUBLICAS DE SERVICIOS MQ**/
+    public String trxCod = "";
+    public String trxMsj = "";
+    
+    public String LogAvanazadoFilePath = "";
+    public String LogEncuestaFilePath = "";
+    public String LogKronosFilePath = "";
+//
+//    public KVPairList XMLKVPairList = new KVPairList();
+
+//    public Parameters Params = new Parameters();
+
+    public String ExceptionMessage = "";
+
+    public String InstanceID = "";
+
+    public boolean DVesK = false;
+
+
+    public FunctionsSantander(String ParametersFile)
+    {
+    	super(ParametersFile);  			
+    	inicializar();
+    }
+    
+    public FunctionsSantander(String ParametersFile, String id)
+    {    	
+    	super(ParametersFile, id);
+    	inicializar();
+    }
+    
+    /*Parametros adicionales a Leer que no lee el FGVP*/
+    private void inicializar(){
+    	MQhost = this.Params.GetValue("IvrToMQhost", "127.0.0.1");
+    	MQport = Integer.valueOf(this.Params.GetValue("IvrToMQport", "50039"));
+    	
+    	timeoutSocket  = Integer.valueOf(this.Params.GetValue("SocketTimeout", "2000"));    	
+    	LogKronosFilePath = this.Params.GetValue("LogKronosFilePath", "IVR_Santander_Banco_Peformance");
+    }
+    
+    
+    public void loggerTraza(String Message, String Level){
+    	//Set Logger options;    	    	
+    	SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd");
+    	format.setTimeZone(TimeZone.getTimeZone(this.Timezone));
+    	Date curDate = new Date();
+    	//CREA UN ARCHIVO POR DIA (Y ES BASE PARA OTROS LOGS)
+    	String DateToStr = format.format(curDate);
+    	
+    	log = Logger.getLogger("GVPTRAZA");
+    	RollingFileAppender appender = (RollingFileAppender) log.getAppender("gvplogtrazafile");     	
+
+    	String archivo = this.DebugFilePath.replace(".log", "");    	
+    	if (archivo.equals("")){
+    		archivo = "C:\\logs\\IVR\\TrazaLog";
+    	}    	
+    	archivo = archivo + "-" + DateToStr + ".log";
+    	
+    	appender.setFile(archivo);
+    	appender.activateOptions();
+    	
+    	// DEBUG < INFO < WARN < ERROR < FATAL
+    	if (Level.equalsIgnoreCase("DEBUG")) {
+    			log.debug(Message); 
+    	}else if (Level.equalsIgnoreCase("INFO")) {
+    			log.info(Message); 
+    	}else if (Level.equalsIgnoreCase("WARN")) {
+    			log.warn(Message); 
+    	}else if (Level.equalsIgnoreCase("ERROR")) {
+    			log.error(Message); 
+    	}else if (Level.equalsIgnoreCase("FATAL")) {
+    			log.fatal(Message); 
+    	}else { 
+    			log.debug(Message); 
+    	}
+    	
+    }
+    
+    public void loggerPeformance(String Message, String Level){
+    	//Set Logger options;    	    	
+    	SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd");
+    	format.setTimeZone(TimeZone.getTimeZone(this.Timezone));        
+    	Date curDate = new Date();
+    	//CREA UN ARCHIVO POR DIA (Y ES BASE PARA OTROS LOGS)
+    	String DateToStr = format.format(curDate);
+    	
+    	log = Logger.getLogger("GVPTRAZA");
+    	RollingFileAppender appender = (RollingFileAppender) log.getAppender("gvplogtrazafile");     	
+
+    	String archivo = LogKronosFilePath.replace(".log", "");    	
+    	if (archivo.equals("")){
+    		archivo = "C:\\logs\\IVR\\PerformanceLog";
+    	}    	
+    	archivo = archivo + "-" + DateToStr + ".log";
+    	
+    	appender.setFile(archivo);
+    	appender.activateOptions();
+    	
+    	// DEBUG < INFO < WARN < ERROR < FATAL
+    	if (Level.equalsIgnoreCase("DEBUG")) {
+    			log.debug(Message); 
+    	}else if (Level.equalsIgnoreCase("INFO")) {
+    			log.info(Message); 
+    	}else if (Level.equalsIgnoreCase("WARN")) {
+    			log.warn(Message); 
+    	}else if (Level.equalsIgnoreCase("ERROR")) {
+    			log.error(Message); 
+    	}else if (Level.equalsIgnoreCase("FATAL")) {
+    			log.fatal(Message); 
+    	}else { 
+    			log.debug(Message); 
+    	}
+    	
+    }
+
+
+    
+    public void registrarLog(String Message, String tipoLog, String Level){
+    	//Set Logger options;    	    	
+    	SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd");
+    	format.setTimeZone(TimeZone.getTimeZone(this.Timezone));        
+    	Date curDate = new Date();
+    	//CREA UN ARCHIVO POR DIA (Y ES BASE PARA OTROS LOGS)
+    	String DateToStr = format.format(curDate);
+    	
+    	log = Logger.getLogger("GVPTRAZA");
+    	RollingFileAppender appender = (RollingFileAppender) log.getAppender("gvplogtrazafile");     	
+
+    	String archivo = "";
+    	
+    	if (tipoLog.equals("KRONOS")){
+    		archivo = LogKronosFilePath.replace(".log", "");
+    	}else if (tipoLog.equals("AVANZADO")){
+    		archivo = LogAvanazadoFilePath.replace(".log", "");
+    	}else if (tipoLog.equals("ENCUESTA")){
+    		archivo = LogEncuestaFilePath.replace(".log", "");
+    	}
+    	
+    	if (archivo.equals(""))
+    		archivo = "C:\\logs\\IVR\\Log_Santander_Banco";
+    	    	
+    	archivo = archivo + "-" + DateToStr + ".log";
+    	
+    	appender.setFile(archivo);
+    	appender.activateOptions();
+    	
+    	// DEBUG < INFO < WARN < ERROR < FATAL
+    	if (Level.equalsIgnoreCase("DEBUG")) {
+    			log.debug(Message); 
+    	}else if (Level.equalsIgnoreCase("INFO")) {
+    			log.info(Message); 
+    	}else if (Level.equalsIgnoreCase("WARN")) {
+    			log.warn(Message); 
+    	}else if (Level.equalsIgnoreCase("ERROR")) {
+    			log.error(Message); 
+    	}else if (Level.equalsIgnoreCase("FATAL")) {
+    			log.fatal(Message); 
+    	}else { 
+    			log.debug(Message); 
+    	}
+    	
+    }
+
+
+    public void WriteParameters (String ParametersFile)
+    {
+        Debug("[FunctionsGVP - WriteParameters] Escribiendo archivo de parametros.", "Detail");
+
+        Params.WriteParametersFile(ParametersFile);
+    }
+
+
+
+    public boolean Log (String Message, boolean IncludeDateTime)
+    {
+        String LogMessage = "";
+
+        if( IncludeDateTime )
+        {
+            // Obtiene fecha  hora actual y la formatea para cabecera
+            // del texto que se escribira en el archivo de Log.
+            TimeZone tz = TimeZone.getTimeZone(this.Timezone);
+            SimpleDateFormat DateFormatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SSS");
+            DateFormatter.setTimeZone(tz);
+            String DateString = DateFormatter.format(new Date());
+
+            // Compone el texto que se escribira en el archivo de Log
+            LogMessage += DateString + " ";
+        }
+
+        LogMessage += Message + "\n";
+
+        try
+        {
+            File fLogFile = new File(this.DebugFilePath);
+
+            fLogFile.createNewFile();
+
+            if( fLogFile.canWrite() )
+            {
+                FileOutputStream osLogFile = new FileOutputStream(fLogFile, true);
+
+                osLogFile.write(LogMessage.getBytes());
+                osLogFile.close();
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        catch( Exception e )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+    public boolean Log (String Message)
+    {
+        return Log(Message, true);
+    }
+
+
+   
+    public void RegistraLogTransacciones(String sANI, String sDNIS, String sRutCliente, String sTransaccion, String sResultado, String sTiempoEjecucion)
+    {
+        try
+        {
+            // FunctionsGVP fGVP = new FunctionsGVP();
+
+            TimeZone tz = TimeZone.getTimeZone(this.Timezone);
+            SimpleDateFormat DateFormatter = new SimpleDateFormat("yyyyMMdd");
+            DateFormatter.setTimeZone(tz);
+            String sFecha = DateFormatter.format(new Date());
+
+            StringBuffer bArchivoLog = new StringBuffer("D://CIC_RIPLEY//Prod//Diplog//Transacciones//");
+            bArchivoLog.append("LogTransacciones.");
+            bArchivoLog.append(sFecha);
+            bArchivoLog.append(".txt");
+            String sArchivoLog = bArchivoLog.toString();
+
+            // La fecha y hora debe ser generada al momenmto de generar el registro
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            df2.setTimeZone(tz);
+            sFecha = df2.format(new Date());
+
+            SimpleDateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+            df3.setTimeZone(tz);
+            String sHora = df3.format(new Date());
+
+            StringBuffer bRegistroLog = new StringBuffer("");
+            bRegistroLog.append(sFecha);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sHora);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sANI);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sDNIS);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sRutCliente);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sTransaccion);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sResultado);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sTiempoEjecucion);
+
+            String sRegistroLog = bRegistroLog.toString();
+
+            // fGVP.this.DebugFilePath = sArchivoLog;
+
+            // fGVP.Log(sRegistroLog, false);
+
+            this.DebugFilePath = sArchivoLog;
+
+            Log(sRegistroLog, false);
+        }
+
+        catch(Exception e)
+        {
+        }
+    }
+
+
+
+    public void RegistraLogTransacciones(Map<String, String> parametros, String sTransaccion, String sResultado, String sTiempoEjecucion)
+    {
+        try
+        {
+            // FunctionsGVP fGVP = new FunctionsGVP();
+
+            String sANI = (String) parametros.get("ANI");
+            String sDNIS = (String) parametros.get("DNIS");
+            String sRutCliente = (String) parametros.get("RutCliente");
+
+            TimeZone tz = TimeZone.getTimeZone(this.Timezone);
+            SimpleDateFormat DateFormatter = new SimpleDateFormat("yyyyMMdd");
+            DateFormatter.setTimeZone(tz);
+            String sFecha = DateFormatter.format(new Date());
+
+            StringBuffer bArchivoLog = new StringBuffer("D://CIC_RIPLEY//Prod//Diplog//Transacciones//");
+            bArchivoLog.append("LogTransacciones.");
+            bArchivoLog.append(sFecha);
+            bArchivoLog.append(".txt");
+            String sArchivoLog = bArchivoLog.toString();
+
+            // La fecha y hora debe ser generada al momenmto de generar el registro
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            df2.setTimeZone(tz);
+            sFecha = df2.format(new Date());
+
+            SimpleDateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+            df3.setTimeZone(tz);
+            String sHora = df3.format(new Date());
+
+            StringBuffer bRegistroLog = new StringBuffer("");
+            bRegistroLog.append(sFecha);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sHora);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sANI);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sDNIS);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sRutCliente);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sTransaccion);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sResultado);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sTiempoEjecucion);
+
+            String sRegistroLog = bRegistroLog.toString();
+
+            // fGVP.this.DebugFilePath = sArchivoLog;
+
+            // fGVP.Log(sRegistroLog, false);
+
+            this.DebugFilePath = sArchivoLog;
+
+            Log(sRegistroLog, false);
+        }
+
+        catch(Exception e)
+        {
+        }
+    }
+
+
+
+    public void RegistroControl (Map<String, String> parametros, String sTipoLog, String sPuntoControl, String sVector)
+    {
+        try
+        {
+            String sArchivoLog = (String) parametros.get("ArchivoLog");
+            String sIDLlamada = (String) parametros.get("IDLlamada");
+            String sRUTCliente = (String) parametros.get("RutCliente");
+            String sRUTLlamador = (String) parametros.get("RUTLlamador");
+            String sANI = (String) parametros.get("ANI");
+            String sDNIS = (String) parametros.get("DNIS");
+            String sConnID = (String) parametros.get("ConnID");
+
+            // La fecha y hora debe ser generada al momenmto de generar el registro
+            TimeZone tz = TimeZone.getTimeZone(this.Timezone);
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            df2.setTimeZone(tz);
+            String sFecha = df2.format(new Date());
+
+            SimpleDateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+            df3.setTimeZone(tz);
+            String sHora = df3.format(new Date());
+
+            if (sRUTCliente.equals(""))
+                sRUTCliente ="0000000";
+
+            StringBuffer bRegistroLog = new StringBuffer(sIDLlamada);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sRUTCliente);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sTipoLog);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sPuntoControl);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sVector);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sFecha);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sHora);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sANI);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sDNIS);
+            bRegistroLog.append(";");
+            bRegistroLog.append(sConnID);
+
+            String sRegistroLog = bRegistroLog.toString();
+
+            this.DebugFilePath = sArchivoLog;
+            loggerTraza(sRegistroLog, "DEBUG");
+//            Log(sRegistroLog, false);
+        }
+
+        catch (Exception e)
+        {
+            return;
+        }
+
+        return;
+    }
+
+
+    public long calcularDuracion(Date inicio, Date fin){
+
+ 		java.util.GregorianCalendar fechaIni = new java.util.GregorianCalendar();
+ 		fechaIni.setTime(inicio);
+ 	    
+ 	    java.util.GregorianCalendar fechaFin = new java.util.GregorianCalendar();
+ 	    fechaFin.setTime(fin);
+ 	    
+ 	    Date primer = fechaIni.getTime();
+ 	    Date ultimo = fechaFin.getTime();
+
+ 		long resta = ultimo.getTime() - primer.getTime();
+ 	    long minutos = (resta/(1000*60));
+ 	    long horas = (resta/(1000*60*60));	    
+ 	    long min = minutos - (horas*60);	   	   	   
+ 	    
+ 	    long miliSegIni = fechaIni.getTimeInMillis();
+ 	    long miliSegFin = fechaFin.getTimeInMillis();
+ 	    
+// 	    long seg = (miliSegFin - miliSegIni)/1000;
+// 	    
+// 	    long totalSeg = 0;
+// 	    if (min > 0){
+// 	    	totalSeg = seg - (min*60);
+// 	    }else{
+// 	    	totalSeg = seg;
+// 	    }
+
+// 	    String duracion = ""+totalSeg;
+ 	    
+ 		return miliSegFin - miliSegIni;
+ 	}
+    
+    public void RegistroPeformance(Map<String, Object> parametros)
+    {
+        try
+        {            
+//            String sIDLlamada =  parametros.get("IDLlamada");
+            String sRUT =  parametros.get("RUT").toString();
+            Date fechaIni =  (Date) parametros.get("FechaInicio");
+//            Date sHoraIni =  parametros.get("HoraInicio");
+//            String sServicio =  parametros.get("Servicio");
+//            String sTipoServicio =  parametros.get("TipoServicio");
+//            String sConnID =  parametros.get("ConnID");
+
+            // La fecha y hora debe ser generada al momenmto de generar el registro
+            TimeZone tz = TimeZone.getTimeZone(this.Timezone);
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            df2.setTimeZone(tz);
+            Date fechaFin = new Date();
+            String sFechaFin = df2.format(fechaFin);
+
+            SimpleDateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+            df3.setTimeZone(tz);
+            String sHoraFin = df3.format(fechaFin);
+
+            long tiempoRespuesta = calcularDuracion(fechaIni, fechaFin);
+            
+            if (sRUT.equals(""))
+                sRUT="0000000";
+
+            String mensaje = "";
+            mensaje += parametros.get("ConnID").toString()+";";
+            mensaje += sRUT+";";
+            mensaje += sFechaFin+";";
+            mensaje += sHoraFin+";";
+            mensaje += parametros.get("Servicio").toString()+";";
+            mensaje += parametros.get("TipoServicio").toString()+";";
+            mensaje += tiempoRespuesta+";";
+            mensaje += parametros.get("Resultado").toString()+";";
+            mensaje += parametros.get("MensajeError").toString()+";";
+
+            loggerPeformance(mensaje, "DEBUG");
+        }
+
+        catch (Exception e){
+            
+        }
+
+        return;
+    }
+    
+
+//    public String rpad(String data, int length) {
+//        return rpad(data, length, " ");
+//    }
+//
+//
+//
+//    public String rpad(String data, int length, String filler) {
+//        return Rellena(data, filler, length, 1);
+//    }
+//
+//
+//
+//    public String lpad(String data, int length) {
+//        return lpad(data, length, "0");
+//    }
+//
+//
+//
+//    public String lpad(String data, int length, String filler) {
+//        return Rellena(data, filler, length, 2);
+//    }
+
+
+//     /** Metodo para rellenar cadenas
+//        * Orden = 1:derecha   2:izquierda
+//        * @params valor String
+//        * @params caracter String
+//        * @params largo Int
+//        * @params orden Int
+//        * @return valor
+//        */
+//    public String Rellena(String valor, String caracter, int largo, int orden)
+//    {
+//        int largoV = valor.length();
+//
+//        if(orden == 1)
+//        {
+//            for(int i = largoV; i<largo; i++)
+//            {
+//                valor = valor + caracter;
+//            }
+//        }
+//        else
+//        {
+//            for(int i = largoV; i<largo; i++)
+//            {
+//                valor = caracter + valor;
+//            }
+//        }
+//
+//        return valor;
+//    }
+
+    
+
+
+    
+    
+    
+    public Parameters leerParametrosWS(){
+    	Parameters parametros = new Parameters();
+    	String catalina = System.getProperty("catalina.base");    	
+    	String archivo = catalina + "//lib//ConfiguracionServiciosWeb.properties";
+//    	String archivo = "D://Composer//workspace_Ripley//ConfiguracionServiciosWeb.properties";
+    	parametros.ReadParametersFile(archivo);
+    	return parametros;
+    }
+	
+    public Parameters leerParametrosMQ(String nombreServicio){
+    	Parameters parametros = new Parameters();
+    	String catalina = System.getProperty("catalina.base");    	
+    	String archivo = catalina + "//lib//ConfiguracionServiciosMQ.properties";
+//    	String archivo = "D://Composer//workspace_Ripley//ConfiguracionServiciosMQ.properties";
+    	parametros.ReadParametersFile(archivo);
+    	return parametros;
+    }
+    
+    public Parameters leerMatrizCampanas(){
+    	Parameters parametros = new Parameters();
+    	String catalina = System.getProperty("catalina.base");    	
+    	String archivo = catalina + "//lib//ConfiguracionMatrizCampanas.properties";
+//    	String archivo = "D://Composer//workspace_Ripley//ConfiguracionMatrizCampanas.properties";
+    	parametros.ReadParametersFile(archivo);
+    	return parametros;
+    }
+    
+    
+    public boolean iniciarConexionBDOracle(String nombreBD){
+    	boolean retorno = false;
+    	try{
+    		String catalina = System.getProperty("catalina.base");    	    		    		
+        	String archivoParametros = catalina + "//lib//ConexionesDB.properties";
+//    		String archivoParametros = "D://Composer//workspace_Ripley//ConexionesDB.properties";
+        	parametrosBD.ReadParametersFile(archivoParametros);
+        	
+        	String connectionURL = "";
+        	String user = parametrosBD.GetValue(nombreBD+"_user");
+        	String pass = parametrosBD.GetValue(nombreBD+"_pass");
+        	int timeout  = Integer.valueOf(parametrosBD.GetValue(nombreBD+"_timeout"));
+        	
+        	if ((parametrosBD.GetValue(nombreBD+"_url") != null) && (!parametrosBD.GetValue(nombreBD+"_url").equalsIgnoreCase(""))){
+        		Debug("[ConexionBD "+nombreBD+"] Conexion URL = "+parametrosBD.GetValue(nombreBD+"_url"), "DEBUG");
+        		connectionURL = parametrosBD.GetValue(nombreBD+"_url");
+        	}else{
+        		Debug("[ConexionBD "+nombreBD+"] Conexion a armar", "DEBUG");
+        		String host = parametrosBD.GetValue(nombreBD+"_host");
+            	String port = parametrosBD.GetValue(nombreBD+"_port");
+            	String servicio = parametrosBD.GetValue(nombreBD+"_service");
+            	
+            	String isSID = parametrosBD.GetValue(nombreBD+"_isSID");
+	    	
+            	connectionURL = conexionDB.getURLConexion(host, port, servicio, isSID.equalsIgnoreCase("false"));
+        	}
+        	
+        	
+        	if (conexionDB.OpenDataBase(connectionURL, user, pass, timeout)){
+        		Debug("[ConexionBD "+nombreBD+"] Conexion Exitosa.", "INFO");
+        		retorno = true;
+        	}else{
+        		Debug("[ConexionBD "+nombreBD+"] Conexion Fallida.", "INFO");
+        		Debug("[ConexionBD "+nombreBD+"] Error "+conexionDB.GetErrorMessage(), "DEBUG");
+        	}
+    	}catch(Exception ex){
+    		trxCod = "Timeout";
+    		trxMsj = ex.getMessage();
+    	}finally{
+        	return retorno;
+    	}    	
+    }
+    
+    public void finalizarConexionBDOracle(){       	
+    	if (this.conexionDB != null)
+    		conexionDB.CloseDataBase();
+    	Debug("[ConexionBD] Conexion Finalizada " +conexionDB.getEcErrorMessage(), "INFO");
+    	
+    }
+    
+    /* 
+     * METODO GENERICO PARA CONEXION A IvrToMQ
+     * 
+     * */
+    private String conexionIvrToMQ(String queueName, String mensaje){
+    	String respuesta = "";
+    	
+    	Socket socket = null;
+    	
+    	try{
+    		Debug("[Conexion_MQ] *** INICIO CONEXION A MQ ***", "DEBUG");
+//        	Debug("[Conexion_MQ] *** HOST : "+MQhost, "DEBUG");
+//        	Debug("[Conexion_MQ] *** PORT : "+MQport, "DEBUG");
+        	
+        	socket = new Socket(MQhost, MQport);	
+        	
+        	int timeout = Integer.valueOf(this.Params.GetValue("SocketTimeout", "2000"));//Integer.valueOf(ObtenerParametroProperties("WS_BeneficiariTimeout", "ConfiguracionServiciosMQ.properties")).intValue();
+        	socket.setSoTimeout(timeout);
+			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+//			BufferedReader userInputBR = new BufferedReader(new InputStreamReader(System.in));
+//			String userInput = userInputBR.readLine();				
+			
+			//Escribiendo Mensaje al IvrToMQ
+			String mensajeToMQ = "IvrToMQ:"+queueName+":"+mensaje;						
+			Debug("[Conexion_MQ] *** REQ  : "+mensaje, "DEBUG");
+			out.println(mensajeToMQ);
+			
+			//Leyendo Respuesta del IvrToMQ
+			respuesta = br.readLine();
+			Debug("[Conexion_MQ] *** RESP : "+respuesta, "DEBUG");
+
+		}catch (UnknownHostException e) {
+			Debug("[Conexion_MQ] - UnknownHostException "+ e.getMessage(), "DEBUG");
+			respuesta = "TimeOut";
+			trxCod = "TimeOut";
+			trxMsj = e.getMessage();
+		}catch (IOException e) {
+			Debug("[Conexion_MQ] - IOException "+ e.getMessage(), "DEBUG");
+			respuesta = "TimeOut";
+			trxCod = "TimeOut";
+			trxMsj = e.getMessage();
+		}catch (Exception e) {
+			Debug("[Conexion_MQ] - Exception "+ e.getMessage(), "DEBUG");
+			respuesta = "Error";
+			trxCod = "Error";
+			trxMsj = e.getMessage();
+		}finally{
+			if (socket != null){
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					
+					e1.printStackTrace();
+				}				
+			}
+			Debug("[Conexion_MQ] *** FIN CONEXION A MQ ***", "DEBUG");
+		}
+    	
+    	return respuesta;
+    }
+
+    
+    /*
+     * CREDITOS CONSUMO E HIPOTECARIO
+     * OBTENER CUOTAS PAGADAS
+     * 
+     * Tipo MQ
+     * Nombre Servicio SFISERB850C
+     * Queue Name REQ --> SFISERB850C.REQ
+     * Queue Name RESP --> SFISERB850C.RESP
+     * 
+     * */
+    public boolean TestMQ(Properties datosEntrada){
+    	boolean retorno = false;
+    	String respuesta = "";
+    	String requerimiento = "";
+    	String nombreQueue = "SFISERB850C";
+    	
+    	SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+    	String fechaHoy = formatoFecha.format(new Date());
+    	
+    	try{
+    		Debug("["+nombreQueue+"] *** INICIO Ejecucion de la transaccion ***", "INFO");
+    		Debug("["+nombreQueue+"] RUT : " + datosEntrada.getProperty("RUT"), "INFO");
+    		
+    		//Parameters parametros = leerParametrosMQ(nombreQueue);
+    		
+            /*INICIO XML*/
+            requerimiento += "<?xml version=\"1.0\" encoding=\"UTF-8\"?><MWAS><Hdr><Servicio>"+nombreQueue+"</Servicio></Hdr><Datos><![CDATA[";
+            
+            /*MENSAJE*/
+           	//DATOS HEADER
+        	requerimiento += "0000000000";			// INV-COD-RETORNO         	    	    	
+        	requerimiento += this.Rellena(""+nombreQueue+"", " ", 50, 1);			// INV-NOMBRE-SERVICIO
+        	requerimiento += "000003290";			// INV-LARGO-MENSAJE
+        	
+        	//DATOS ENCABEZADO
+        	requerimiento += this.Rellena("15", "0", 6, 0);		// L850C-CODIGO-CANAL
+        	requerimiento += this.Rellena("", " ", 8, 1);		// L850C-CODIGO-USUARIO
+//        	requerimiento += parametros.GetValue(nombreQueue+"-COD-OFICINA", "0001");				// L850C-COD-OFICINA
+//        	requerimiento += parametros.GetValue(nombreQueue+"-TERM-FISICO", "0001");				// L850C-TERM-FISICO
+//        	requerimiento += this.Rellena(datosEntrada.getProperty("CODENT"), " ", 4, 1);		// L850C-COD-ENT 810
+        	requerimiento += "CL";													// L850C-CODIGO-PAIS
+        	
+        	//DATOS PAGINACION
+        	requerimiento += "N";								// L850C-IND-PAGINACION
+        	requerimiento += this.Rellena("", " ", 200, 1);		// L850C-CLAVE-INICIO
+        	requerimiento += this.Rellena("", " ", 200, 1);		// L850C-CLAVE-FIN
+        	requerimiento += "000";								// L850C-PANTALLA-PAG
+        	requerimiento += "N";								// L850C-IND-MAS-DATOS
+        	requerimiento += this.Rellena("", " ", 90, 1);		// L850C-MAS-DATOS
+        	
+        	//DATOS ENTRADA
+        	requerimiento += "    ";							// L850C-SUCURSAL
+        	requerimiento += "    ";							// L850C-DEPARTAMENTO
+        	requerimiento += this.Rellena(datosEntrada.getProperty("RUT"), "0", 10, 0);	// L850C-RUT
+//        	requerimiento += datosEntrada.getProperty("COD-FAMILIA");	// L850C-COD-FAMILIA --> 6=CREDITOS CONSUMO; 7 CREDITOS HIPOTECARIO
+        	requerimiento += "C";								// L850C-TIPOIDENTIFICACION
+        	
+        	
+        	requerimiento += "]]></Datos></MWAS>";
+        	/*FIN XML*/
+        	
+        	respuesta = conexionIvrToMQ(nombreQueue, requerimiento);
+
+        	if (!respuesta.equals("TimeOut") && !respuesta.equals("Error")){        		
+	        	
+        	}
+    	}catch (Exception e){
+    		
+    	}
+    	
+    	
+    	return retorno;
+    }
+    
+    
+    /**
+     * Metodo utilizado para Verificar si rut de empresas puede navegar para el servicio de SAT     * 
+	 * 
+	 *
+	 * @param rut : Rut Empresas con DV sin Guion
+	 * @return retorno - boolean
+     * */
+    public boolean VerificarRUTParaSAT(String rut){
+    	boolean retorno = false;
+		String catalina = System.getProperty("catalina.base");
+		String iniFile = "";
+		String fileName = "rutero_sat.ini"; 
+		if(catalina != null)
+			iniFile = catalina+"\\lib\\Santander\\"+fileName;
+		else
+			iniFile = "D:\\Documentos\\Santander\\MQ\\Ini\\"+fileName;
+		
+		try {
+			FileInputStream fis = new FileInputStream(iniFile);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+		 
+			String line = null;
+			while ((line = br.readLine()) != null) 
+				if (line.equalsIgnoreCase(rut))
+					retorno = true;	
+			
+			br.close();			
+		} catch (IOException e) {
+			DebugError("Error en VerificarRUTParaSAT "+e.getMessage());
+			e.printStackTrace();			
+		}
+		return retorno;
+    }
+    
+ }
