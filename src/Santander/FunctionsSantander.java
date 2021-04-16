@@ -68,7 +68,7 @@ import cl.econtact.soap.caller.WsTodasTarjetasRut;
 import cl.econtact.soap.caller.WsUserTokenList;
 import cl.econtact.soap.caller.WsUsuarioPuntoVenta;
 import cl.econtact.soap.caller.WsValidaDesafio;
-
+import cl.econtact.soap.caller.WsCONCruceDeProductos;
 
 public class FunctionsSantander extends FunctionsGVP
 {
@@ -801,6 +801,56 @@ public class FunctionsSantander extends FunctionsGVP
         }
         
         System.out.println("result listaNegra.... " + result.toString()  );
+        return result;
+    }
+    
+    public JSONObject getObtieneAudioCampanaSP(String nombreCampana, String listaCampana) {
+        JSONObject result = new JSONObject();
+        Connection conn = null;  
+        ResultSet rs = null;
+        CallableStatement cStmt =null;
+        
+        try{
+
+            if (conexionDB.OpenDataBase(this.oracleUrl, this.oracleUser, this.oraclePass, this.oracleTimeOut)){
+                 Debug("[ObtieneAudioCampanaSP] Conexion Exitosa.", "INFO");                  
+                 conn=conexionDB.getEcConexion();  
+                 cStmt = conn.prepareCall("{call SPOBTIENEAUDIOCAMPANHAIVR (?,?,?)}");   
+                 cStmt.setString(1, nombreCampana);   
+                 cStmt.setString(2, listaCampana);  
+                 cStmt.registerOutParameter(3,  OracleTypes.CURSOR);    
+                 cStmt.execute();
+
+                 ResultSet cursorResultSet = (ResultSet) cStmt.getObject(3);
+                 
+                 System.out.println(cursorResultSet.toString()); 
+                 
+                 while (cursorResultSet.next())
+                 {
+                	
+                	if(cursorResultSet.getInt(1)==0){
+                		result.put("EntregaAudio","NO");
+                	}else{
+                		result.put("audio", cursorResultSet.getString(1));
+                        System.out.println(cursorResultSet.getString(1));     
+                		result.put("EntregaAudio","SI");
+                	}
+                                
+                 } 	            
+             }else{
+                Debug("[ObtieneAudioCampanaSP] Conexion Fallida.", "INFO");
+                Debug("[ObtieneAudioCampanaSP] Error "+conexionDB.GetErrorMessage(), "DEBUG");
+            }
+        } catch (SQLException e) {
+           // TODO Auto-generated catch block        
+           e.printStackTrace();
+        }catch(Exception ex){
+            // TODO Auto-generated catch block        	
+            ex.printStackTrace();
+        }finally{
+            if (this.conexionDB != null) conexionDB.CloseDataBase();
+        }        
+        System.out.println("result ObtieneAudioCampanaSP.... " + result.toString()  );
         return result;
     }
     
@@ -1857,6 +1907,51 @@ public class FunctionsSantander extends FunctionsGVP
     	
     	return result;
     }
+    
+    
+    
+    
+    public JSONObject getCONCruceDeProductos(String canalId, String usuarioAlt, String rut) {
+    	String url = this.getParametro("urlWSCONCruceDeProductos");
+    	return getCONCruceDeProductos(canalId, usuarioAlt, rut, url);
+    }
+    
+    public JSONObject getCONCruceDeProductos(String canalId, String usuarioAlt, String rut, String url) {   
+		JSONObject result = new JSONObject();
+		try {
+			
+			WsCONCruceDeProductos ws = new WsCONCruceDeProductos(url);
+			
+			// --
+			ws.setTrueStorePath(this.getParametro("keyStorePath"));
+			ws.setTrueStoreType(this.getParametro("Type"));
+			ws.setTrueStorePassword(this.getParametro("Password"));
+			
+			// --
+						
+			result=ws.getDatos(canalId, usuarioAlt, rut);   
+			
+			if (result.getString("status").equals("SUCCESS")){
+				if (result.getString("res").equals("OK")){
+					result.put("resWS", "OK");				
+				
+				}else{
+					result.put("resWS", "NOK");
+					
+					result.put("CODERROR", "res NOK");
+				}
+			}else{
+				result.put("resWS", "NOK");
+			}
+		} catch (Exception e) {
+			DebugError("Error en getCONCruceDeProductos "+e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return result;   
+    }
+    
+    
     
     // ------------------------------------------------------------
     
