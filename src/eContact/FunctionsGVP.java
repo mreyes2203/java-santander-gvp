@@ -487,7 +487,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
        	 	     }    
        	 	     // eliminaciones en duro
        	 	    
-       	 	     String deleteFile1 = fDebugFile.getParent() + "/" + "IVR_Cobranza-FECHA.log".replace("FECHA",nuevaCadena);	
+       	 	     String deleteFile1 = fDebugFile.getParent() + "/" + "IVR_CobranzaFECHAlog".replace("FECHA",nuevaCadena);	
     	 	     System.out.println("eliminando Archivo: "+ deleteFile1);
     	 	     File f1 = new File(deleteFile1);
     	 	     if(f1.exists() && !f1.isDirectory()) { 
@@ -499,7 +499,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	 }
     	 	     }    
        	 	 
-    	 	     String deleteFile2 = fDebugFile.getParent() + "/" + "IVR_Derivacion_Cero_Ring-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	     String deleteFile2 = fDebugFile.getParent() + "/" + "IVR_Derivacion_Cero_RingFECHAlog".replace("FECHA",nuevaCadena);	
     	 	     System.out.println("eliminando Archivo: "+ deleteFile2);
     	 	     File f2 = new File(deleteFile2);
     	 	     if(f2.exists() && !f2.isDirectory()) { 
@@ -511,7 +511,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	 }
     	 	     }    
 
-    	 	     String deleteFile3 = fDebugFile.getParent() + "/" + "IVR_Persona_Banco-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	     String deleteFile3 = fDebugFile.getParent() + "/" + "IVR_Persona_BancoFECHAlog".replace("FECHA",nuevaCadena);	
     	 	     System.out.println("eliminando Archivo: "+ deleteFile3);
     	 	     File f3 = new File(deleteFile3);
     	 	     if(f3.exists() && !f3.isDirectory()) { 
@@ -523,7 +523,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	 }
     	 	     }    
 
-    	 	    String deleteFile4 = fDebugFile.getParent() + "/" + "IVR_SAT-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile4 = fDebugFile.getParent() + "/" + "IVR_SATFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile4);
     	 	    File f4 = new File(deleteFile4);
     	 	    if(f4.exists() && !f4.isDirectory()) { 
@@ -535,7 +535,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	}
     	 	    }    
 
-    	 	    String deleteFile5 = fDebugFile.getParent() + "/" + "IVR_Santander_Pass-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile5 = fDebugFile.getParent() + "/" + "IVR_Santander_PassFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile5);
     	 	    File f5 = new File(deleteFile5);
     	 	    if(f5.exists() && !f5.isDirectory()) { 
@@ -547,7 +547,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	}
     	 	    }    
 
-    	 	    String deleteFile6 = fDebugFile.getParent() + "/" + "IVR_Smartback-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile6 = fDebugFile.getParent() + "/" + "IVR_SmartbackFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile6);
     	 	    File f6 = new File(deleteFile6);
     	 	    if(f6.exists() && !f6.isDirectory()) { 
@@ -559,7 +559,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	}
     	 	    }    
     	 	    
-    	 	    String deleteFile7 = fDebugFile.getParent() + "/" + "IVR_Valevista-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile7 = fDebugFile.getParent() + "/" + "IVR_ValevistaFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile7);
     	 	    File f7 = new File(deleteFile7);
     	 	    if(f7.exists() && !f7.isDirectory()) { 
@@ -571,7 +571,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	}
     	 	    }    
 
-    	 	    String deleteFile8 = fDebugFile.getParent() + "/" + "IVR_Validacion_PinPass-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile8 = fDebugFile.getParent() + "/" + "IVR_Validacion_PinPassFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile8);
     	 	    File f8 = new File(deleteFile8);
     	 	    if(f8.exists() && !f8.isDirectory()) { 
@@ -583,7 +583,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	}
     	 	    }    
 
-    	 	    String deleteFile9 = fDebugFile.getParent() + "/" + "IVR_Validacion_Superclave_Banco-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile9 = fDebugFile.getParent() + "/" + "IVR_Validacion_Superclave_BancoFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile9);
     	 	    File f9 = new File(deleteFile9);
     	 	    if(f9.exists() && !f9.isDirectory()) { 
@@ -595,7 +595,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    	}
     	 	    }    
     	 	    
-    	 	    String deleteFile10 = fDebugFile.getParent() + "/" + "IVR_Clave_Consultiva_Banco-FECHA.log".replace("FECHA",nuevaCadena);	
+    	 	    String deleteFile10 = fDebugFile.getParent() + "/" + "IVR_Clave_Consultiva_BancoFECHAlog".replace("FECHA",nuevaCadena);	
     	 	    System.out.println("eliminando Archivo: "+ deleteFile10);
     	 	    File f10 = new File(deleteFile10);
     	 	    if(f10.exists() && !f10.isDirectory()) { 
@@ -604,6 +604,18 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
     	 	    		System.err.println("Unable to delete file: " + f10);
     	 	    	}else{
     	 	    		System.out.println("Se ha eliminado el archivo: "+f10.getName());
+    	 	    	}
+    	 	    }    
+    	 	    
+    	 	    String deleteFile11 = fDebugFile.getParent() + "/" + "IVR_Clave_Consultiva_AsistidaFECHAlog".replace("FECHA",nuevaCadena);	
+    	 	    System.out.println("eliminando Archivo: "+ deleteFile11);
+    	 	    File f11 = new File(deleteFile11);
+    	 	    if(f11.exists() && !f11.isDirectory()) { 
+    	 	    	if(!f11.delete()) {
+    	 	    		System.out.println("Error al eliminar archivo: "+f11.getName());
+    	 	    		System.err.println("Unable to delete file: " + f11);
+    	 	    	}else{
+    	 	    		System.out.println("Se ha eliminado el archivo: "+f11.getName());
     	 	    	}
     	 	    }    
     	 	        	 	    
@@ -670,7 +682,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
                //     fDebugFile = new File(DebugFilePath);
                 
                 fDebugFile.renameTo(fOldDebugFile);
-                fDebugFile = new File(DebugFilePath);
+              //  fDebugFile = new File(DebugFilePath);
             }
             
             //fDebugFile.createNewFile();
@@ -740,7 +752,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
           	 	     }   
           	 	  // eliminaciones en duro
             	 	    
-           	 	     String deleteFile1 = fDebugFile.getParent() + "/" + "IVR_Cobranza-FECHA.log".replace("FECHA",nuevaCadena);	
+           	 	     String deleteFile1 = fDebugFile.getParent() + "/" + "IVR_CobranzaFECHAlog".replace("FECHA",nuevaCadena);	
         	 	     System.out.println("eliminando Archivo: "+ deleteFile1);
         	 	     File f1 = new File(deleteFile1);
         	 	     if(f1.exists() && !f1.isDirectory()) { 
@@ -752,7 +764,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	 }
         	 	     }    
            	 	 
-        	 	     String deleteFile2 = fDebugFile.getParent() + "/" + "IVR_Derivacion_Cero_Ring-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	     String deleteFile2 = fDebugFile.getParent() + "/" + "IVR_Derivacion_Cero_RingFECHAlog".replace("FECHA",nuevaCadena);	
         	 	     System.out.println("eliminando Archivo: "+ deleteFile2);
         	 	     File f2 = new File(deleteFile2);
         	 	     if(f2.exists() && !f2.isDirectory()) { 
@@ -764,7 +776,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	 }
         	 	     }    
 
-        	 	     String deleteFile3 = fDebugFile.getParent() + "/" + "IVR_Persona_Banco-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	     String deleteFile3 = fDebugFile.getParent() + "/" + "IVR_Persona_BancoFECHAlog".replace("FECHA",nuevaCadena);	
         	 	     System.out.println("eliminando Archivo: "+ deleteFile3);
         	 	     File f3 = new File(deleteFile3);
         	 	     if(f3.exists() && !f3.isDirectory()) { 
@@ -776,7 +788,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	 }
         	 	     }    
 
-        	 	    String deleteFile4 = fDebugFile.getParent() + "/" + "IVR_SAT-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile4 = fDebugFile.getParent() + "/" + "IVR_SATFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile4);
         	 	    File f4 = new File(deleteFile4);
         	 	    if(f4.exists() && !f4.isDirectory()) { 
@@ -788,7 +800,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}
         	 	    }    
 
-        	 	    String deleteFile5 = fDebugFile.getParent() + "/" + "IVR_Santander_Pass-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile5 = fDebugFile.getParent() + "/" + "IVR_Santander_PassFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile5);
         	 	    File f5 = new File(deleteFile5);
         	 	    if(f5.exists() && !f5.isDirectory()) { 
@@ -800,7 +812,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}
         	 	    }    
 
-        	 	    String deleteFile6 = fDebugFile.getParent() + "/" + "IVR_Smartback-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile6 = fDebugFile.getParent() + "/" + "IVR_SmartbackFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile6);
         	 	    File f6 = new File(deleteFile6);
         	 	    if(f6.exists() && !f6.isDirectory()) { 
@@ -812,7 +824,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}
         	 	    }    
         	 	    
-        	 	    String deleteFile7 = fDebugFile.getParent() + "/" + "IVR_Valevista-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile7 = fDebugFile.getParent() + "/" + "IVR_ValevistaFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile7);
         	 	    File f7 = new File(deleteFile7);
         	 	    if(f7.exists() && !f7.isDirectory()) { 
@@ -824,7 +836,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}
         	 	    }    
 
-        	 	    String deleteFile8 = fDebugFile.getParent() + "/" + "IVR_Validacion_PinPass-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile8 = fDebugFile.getParent() + "/" + "IVR_Validacion_PinPassFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile8);
         	 	    File f8 = new File(deleteFile8);
         	 	    if(f8.exists() && !f8.isDirectory()) { 
@@ -836,7 +848,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}
         	 	    }    
 
-        	 	    String deleteFile9 = fDebugFile.getParent() + "/" + "IVR_Validacion_Superclave_Banco-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile9 = fDebugFile.getParent() + "/" + "IVR_Validacion_Superclave_BancoFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile9);
         	 	    File f9 = new File(deleteFile9);
         	 	    if(f9.exists() && !f9.isDirectory()) { 
@@ -848,7 +860,7 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}
         	 	    }    
         	 	    
-        	 	    String deleteFile10 = fDebugFile.getParent() + "/" + "IVR_Clave_Consultiva_Banco-FECHA.log".replace("FECHA",nuevaCadena);	
+        	 	    String deleteFile10 = fDebugFile.getParent() + "/" + "IVR_Clave_Consultiva_BancoFECHAlog".replace("FECHA",nuevaCadena);	
         	 	    System.out.println("eliminando Archivo: "+ deleteFile10);
         	 	    File f10 = new File(deleteFile10);
         	 	    if(f10.exists() && !f10.isDirectory()) { 
@@ -858,7 +870,19 @@ public boolean Write(String DebugFilePathAsig,String DebugMessage ){
         	 	    	}else{
         	 	    		System.out.println("Se ha eliminado el archivo: "+f10.getName());
         	 	    	}
-        	 	    }    
+        	 	    }
+        	 	    
+        	 	    String deleteFile11 = fDebugFile.getParent() + "/" + "IVR_Clave_Consultiva_AsistidaFECHAlog".replace("FECHA",nuevaCadena);	
+        	 	    System.out.println("eliminando Archivo: "+ deleteFile11);
+        	 	    File f11 = new File(deleteFile11);
+        	 	    if(f11.exists() && !f11.isDirectory()) { 
+        	 	    	if(!f11.delete()) {
+        	 	    		System.out.println("Error al eliminar archivo: "+f11.getName());
+        	 	    		System.err.println("Unable to delete file: " + f11);
+        	 	    	}else{
+        	 	    		System.out.println("Se ha eliminado el archivo: "+f11.getName());
+        	 	    	}
+        	 	    }   
 
           	 	    }
               	 }               
