@@ -815,6 +815,7 @@ public class FunctionsSantander extends FunctionsGVP
             if (conexionDB.OpenDataBase(this.oracleUrl, this.oracleUser, this.oraclePass, this.oracleTimeOut)){
                  Debug("[ObtieneAudioCampanaSP] Conexion Exitosa.", "INFO");                  
                  conn=conexionDB.getEcConexion();  
+                 
                  cStmt = conn.prepareCall("{call SPOBTIENEAUDIOCAMPANHAIVR (?,?,?)}");   
                  cStmt.setString(1, nombreCampana);   
                  cStmt.setString(2, listaCampana);  
@@ -822,21 +823,17 @@ public class FunctionsSantander extends FunctionsGVP
                  cStmt.execute();
 
                  ResultSet cursorResultSet = (ResultSet) cStmt.getObject(3);
-                 
-                 System.out.println(cursorResultSet.toString()); 
-                 
+                 System.out.println("actualización");
+           
+                 System.out.println("cursorResultSet.next()" + cursorResultSet.next());       
+                                 
                  while (cursorResultSet.next())
-                 {
-                	
-                	if(cursorResultSet.getInt(1)==0){
-                		result.put("EntregaAudio","NO");
-                	}else{
-                		result.put("audio", cursorResultSet.getString(1));
-                        System.out.println(cursorResultSet.getString(1));     
-                		result.put("EntregaAudio","SI");
-                	}
-                                
-                 } 	            
+                 {        	              	 
+                    result.put("audio", cursorResultSet.getString(1));
+	                System.out.println(cursorResultSet.getString(1));     
+	             } 	
+                     
+                
              }else{
                 Debug("[ObtieneAudioCampanaSP] Conexion Fallida.", "INFO");
                 Debug("[ObtieneAudioCampanaSP] Error "+conexionDB.GetErrorMessage(), "DEBUG");
