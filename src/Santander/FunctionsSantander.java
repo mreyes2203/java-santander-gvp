@@ -825,13 +825,16 @@ public class FunctionsSantander extends FunctionsGVP
                  ResultSet cursorResultSet = (ResultSet) cStmt.getObject(3);
                  System.out.println("actualización");
            
-                 System.out.println("cursorResultSet.next()" + cursorResultSet.next());       
+                 System.out.println("cursorResultSet.next():  " + cursorResultSet.next());       
                                  
                  while (cursorResultSet.next())
-                 {        	              	 
+                 {   
+                	System.out.println("ingrese a rescatar el valor");  
                     result.put("audio", cursorResultSet.getString(1));
-	                System.out.println(cursorResultSet.getString(1));     
-	             } 	
+                    System.out.println(cursorResultSet);   
+                  
+	             } 	                
+               
                      
                 
              }else{
