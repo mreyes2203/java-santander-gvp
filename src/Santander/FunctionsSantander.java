@@ -821,22 +821,16 @@ public class FunctionsSantander extends FunctionsGVP
                  cStmt.setString(2, listaCampana);  
                  cStmt.registerOutParameter(3,  OracleTypes.CURSOR);    
                  cStmt.execute();
-
                  ResultSet cursorResultSet = (ResultSet) cStmt.getObject(3);
-                 System.out.println("actualización");
-           
-                 System.out.println("cursorResultSet.next():  " + cursorResultSet.next());       
-                                 
+                 System.out.println("actualizacion");                 
+               
+                 
                  while (cursorResultSet.next())
                  {   
-                	System.out.println("ingrese a rescatar el valor");  
-                    result.put("audio", cursorResultSet.getString(1));
-                    System.out.println(cursorResultSet);   
-                  
-	             } 	                
-               
-                     
-                
+                	System.out.println("ingrese a rescatar el valor");         
+	                result.put("audio",cursorResultSet.getString(1));	            	        
+	             } 	        
+ 
              }else{
                 Debug("[ObtieneAudioCampanaSP] Conexion Fallida.", "INFO");
                 Debug("[ObtieneAudioCampanaSP] Error "+conexionDB.GetErrorMessage(), "DEBUG");
